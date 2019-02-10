@@ -6,3 +6,4 @@
 /Library.Api/obj
 /Library.Api/Properties
 /RestfulLibraryApi.v3.ncrunchsolution.user
+/Library.Api/bin/Debug/netcoreapp2.0
