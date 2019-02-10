@@ -35,6 +35,30 @@ namespace Library.Api.Controllers
     // OPTIONS
     // url: /api/authors                (no response ... to tell us about the what methods are available on this uri)
 
+
+    // Status Code
+
+    // 100 
+        // Information and were part of HTTP 1 ... and not used by API
+
+    // 200 - Success
+    // 201 - Created
+    // 204 - No Content
+
+    // 300 are used for redirection (not much used by api)
+
+    // 400's are client mistakes
+    // 400 - Bad Request
+    // 401 - Unauthorised (not logged in)
+    // 403 - Forbidden  (logged in but don't have access)
+    // 404 - Not Found (request doesn't exists)
+    // 405 - Method not allowed (trying to send a http requst where a method is not allowed
+
+
+        
+
+
+
     [Route("api/authors")]
     public class AuthorsController
     {
@@ -49,10 +73,16 @@ namespace Library.Api.Controllers
         public IActionResult GetAuthors()
         {
             var authorsFromRepository = _libraryRepository.GetAuthors();
-
             var authors = AutoMapper.Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepository);
-
             return new JsonResult(authors);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetAuthor(Guid id)
+        {
+            var authorFromRepository = _libraryRepository.GetAuthor(id);
+            AuthorDto author = AutoMapper.Mapper.Map<AuthorDto>(authorFromRepository);
+            return new JsonResult(author);
         }
     }
 }
