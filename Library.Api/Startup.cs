@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Library.Api.Models;
 using Library.API.Entities;
+using Library.API.Helpers;
 using Library.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,6 +48,16 @@ namespace Library.Api
             {
                 app.UseExceptionHandler();
             }
+
+
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<Author, AuthorDto>()
+                    .ForMember(authorDto => authorDto.Name,
+                        opt => { opt.MapFrom(author => $"{author.FirstName} {author.LastName}"); })
+                    .ForMember(authorDto => authorDto.Age,
+                        opt => { opt.MapFrom(author => author.DateOfBirth.GetCurrentAge()); });
+            });
 
             //libraryContext.EnsureSeedDataForContext();
 
