@@ -40,19 +40,26 @@ namespace Library.Api.Controllers
 
     // 100 
         // Information and were part of HTTP 1 ... and not used by API
-
+    
+    // 200's .... successfull status codes
     // 200 - Success
     // 201 - Created
     // 204 - No Content
 
-    // 300 are used for redirection (not much used by api)
+    // 300's ... used for redirection (not much used by api)
 
-    // 400's are client mistakes
-    // 400 - Bad Request
+    // 400's ... client mistakes
+    // 400 - Bad Request... consumer of the api has sent something wrong.
     // 401 - Unauthorised (not logged in)
     // 403 - Forbidden  (logged in but don't have access)
     // 404 - Not Found (request doesn't exists)
-    // 405 - Method not allowed (trying to send a http requst where a method is not allowed
+    // 405 - Method not allowed (trying to send a http requst where a HTTP method is not allowed)
+    // 406 - Not acceptable (when trying to call api with content type which is not acceptable)]
+    // 409 - Conflict (request conflict with current state of the system)
+    // 422 - unprocessable entity - (for e.g. if validation rule failed)
+
+    // 500's ... Server Mistakes
+    // 500 - Internal Server Error
 
 
         
