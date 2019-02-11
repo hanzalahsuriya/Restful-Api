@@ -62,12 +62,12 @@ namespace Library.Api.Controllers
     // 500 - Internal Server Error
 
 
-        
+
 
 
 
     [Route("api/authors")]
-    public class AuthorsController
+    public class AuthorsController : Controller
     {
         private readonly ILibraryRepository _libraryRepository;
 
@@ -81,15 +81,20 @@ namespace Library.Api.Controllers
         {
             var authorsFromRepository = _libraryRepository.GetAuthors();
             var authors = AutoMapper.Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepository);
-            return new JsonResult(authors);
+            return Ok(authors);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetAuthor(Guid id)
         {
             var authorFromRepository = _libraryRepository.GetAuthor(id);
+            if (authorFromRepository == null)
+            {
+                return NotFound();
+            }
+
             AuthorDto author = AutoMapper.Mapper.Map<AuthorDto>(authorFromRepository);
-            return new JsonResult(author);
+            return Ok(author);
         }
     }
 }
