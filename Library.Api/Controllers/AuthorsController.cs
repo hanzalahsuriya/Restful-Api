@@ -39,7 +39,7 @@ namespace Library.Api.Controllers
     // Status Code
 
     // 100 
-        // Information and were part of HTTP 1 ... and not used by API
+    // Information and were part of HTTP 1 ... and not used by API
     
     // 200's .... successfull status codes
     // 200 - Success
@@ -79,9 +79,18 @@ namespace Library.Api.Controllers
         [HttpGet()]
         public IActionResult GetAuthors()
         {
-            var authorsFromRepository = _libraryRepository.GetAuthors();
-            var authors = AutoMapper.Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepository);
-            return Ok(authors);
+            //try
+            //{
+                //throw new Exception("something went wrong...");
+                var authorsFromRepository = _libraryRepository.GetAuthors();
+                var authors = AutoMapper.Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepository);
+                return Ok(authors);
+            //}
+            //catch (Exception err)
+            //{
+            //    return StatusCode(500, "Oop's something went wrong");
+            //}
+            
         }
 
         [HttpGet("{id}")]

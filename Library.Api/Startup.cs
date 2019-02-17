@@ -46,7 +46,14 @@ namespace Library.Api
             }
             else
             {
-                app.UseExceptionHandler();
+                app.UseExceptionHandler(async actionBuilder =>
+                {
+                    actionBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An expected fault happened. Try again later.");
+                    });
+                });
             }
 
 
@@ -57,6 +64,8 @@ namespace Library.Api
                         opt => { opt.MapFrom(author => $"{author.FirstName} {author.LastName}"); })
                     .ForMember(authorDto => authorDto.Age,
                         opt => { opt.MapFrom(author => author.DateOfBirth.GetCurrentAge()); });
+
+                cfg.CreateMap<Book, BookDto>();
             });
 
             //libraryContext.EnsureSeedDataForContext();
