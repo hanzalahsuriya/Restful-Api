@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Library.Api.Models;
+using Library.API.Entities;
 using Library.API.Helpers;
 using Library.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
@@ -40,7 +42,7 @@ namespace Library.Api.Controllers
 
     // 100 
     // Information and were part of HTTP 1 ... and not used by API
-    
+
     // 200's .... successfull status codes
     // 200 - Success
     // 201 - Created
@@ -62,8 +64,35 @@ namespace Library.Api.Controllers
     // 500 - Internal Server Error
 
 
+    // Method Safety and Idempotency
 
+    // GET
+    // Safe: Yes
+    // Idempotent: Yes
 
+    // OPTIONS
+    // Safe: Yes
+    // Idempotent: Yes
+
+    // HEAD
+    // Safe: Yes
+    // Idempotent: Yes
+
+    // POST
+    // Safe: No
+    // Idempotent: No
+
+    // PUT
+    // Safe: No
+    // Idempotent: Yes
+
+    // PATCH
+    // Safe: No
+    // Idempotent: No
+
+    // DELETE
+    // Safe: No
+    // Idempotent: Yes
 
 
     [Route("api/authors")]
@@ -93,7 +122,7 @@ namespace Library.Api.Controllers
             
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetAuthorById")]
         public IActionResult GetAuthor(Guid id)
         {
             var authorFromRepository = _libraryRepository.GetAuthor(id);
@@ -104,6 +133,58 @@ namespace Library.Api.Controllers
 
             AuthorDto author = AutoMapper.Mapper.Map<AuthorDto>(authorFromRepository);
             return Ok(author);
+        }
+
+        [HttpPost()]
+        public ActionResult CreateAuthor([FromBody] AuthorForCreationDto authorForCreationDto)
+        {
+            if (authorForCreationDto == null)
+            {
+                return BadRequest();
+            }
+
+            var author = AutoMapper.Mapper.Map<Author>(authorForCreationDto);
+
+            _libraryRepository.AddAuthor(author);
+
+            if (!_libraryRepository.Save())
+            {
+                throw new Exception("Unable to save author");
+            }
+
+            var authorDto = AutoMapper.Mapper.Map<AuthorDto>(author);
+
+            return CreatedAtRoute("GetAuthorById", new {id = authorDto.Id}, authorDto);
+        }
+
+        [HttpPost("{id}")]
+        public IActionResult BlockAuthorCreation(Guid id)
+        {
+            if (_libraryRepository.AuthorExists(id))
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            return NotFound();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteAuthor(Guid id)
+        {
+            var author = _libraryRepository.GetAuthor(id);
+            if (author == null)
+            {
+                return NotFound();
+            }
+
+            _libraryRepository.DeleteAuthor(author);
+
+            if (!_libraryRepository.Save())
+            {
+                throw new Exception("deleted....");
+            }
+
+            return NoContent();
         }
     }
 }

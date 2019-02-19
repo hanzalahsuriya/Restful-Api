@@ -34,6 +34,7 @@ namespace Library.Api
             {
                 options.ReturnHttpNotAcceptable = true;
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
             });
 
             string connectionString = Configuration["connectionStrings:libraryDBConnectionString"];
@@ -71,6 +72,8 @@ namespace Library.Api
                         opt => { opt.MapFrom(author => author.DateOfBirth.GetCurrentAge()); });
 
                 cfg.CreateMap<Book, BookDto>();
+                cfg.CreateMap<AuthorForCreationDto, Author>();
+                cfg.CreateMap<BookForCreationDto, Book>();
             });
 
             //libraryContext.EnsureSeedDataForContext();
