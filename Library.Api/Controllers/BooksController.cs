@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Library.Api.Models;
 using Library.API.Entities;
 using Library.API.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
@@ -97,6 +98,102 @@ namespace Library.Api.Controllers
             if (!_libraryRepository.Save())
             {
                 throw new Exception($"Deleting book {id} for author {authorId} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateBookForAuthor(Guid authorId, Guid id, [FromBody] BookUpdateDto book)
+        {
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            if (!_libraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookForAuthorFromRepository = _libraryRepository.GetBookForAuthor(authorId, id);
+            if (bookForAuthorFromRepository == null)
+            {
+                // Upserting
+                var bookEntity = AutoMapper.Mapper.Map<Book>(book);
+                bookEntity.Id = id;
+
+                _libraryRepository.AddBookForAuthor(authorId, bookEntity);
+
+                if (!_libraryRepository.Save())
+                {
+                    throw new Exception("something went wrong...");
+                }
+
+                var bookDto = AutoMapper.Mapper.Map<BookDto>(bookEntity);
+
+                return CreatedAtRoute("GetBookForAuthor", new {authorId, id = bookDto.Id}, bookDto);
+
+            }
+
+            // update all the fields in bookForAuthorFromRepository from source: bookUpdateDto
+            AutoMapper.Mapper.Map(book, bookForAuthorFromRepository);
+
+            _libraryRepository.UpdateBookForAuthor(bookForAuthorFromRepository);
+
+            if (_libraryRepository.Save())
+            {
+                throw new Exception("something went wrong");
+            }
+
+            return NoContent();
+        }
+
+        public IActionResult UpdateBookForAuthorPartialUpdate(Guid authorId, Guid id,
+            [FromBody] JsonPatchDocument<BookUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return null;
+            }
+
+            if (!_libraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookFromRepo = _libraryRepository.GetBookForAuthor(authorId, id);
+            if (bookFromRepo == null)
+            {
+                // UPSERTING
+                var bookDtoUpdate = new BookUpdateDto();
+                patchDoc.ApplyTo(bookDtoUpdate);
+
+                var bookEntity = AutoMapper.Mapper.Map<Book>(bookDtoUpdate);
+                bookEntity.Id = id;
+
+                _libraryRepository.AddBookForAuthor(authorId, bookEntity);
+
+                if (!_libraryRepository.Save())
+                {
+                    throw new Exception("something went wrong");
+                }
+
+                var bookDtoCreated = AutoMapper.Mapper.Map<BookDto>(bookEntity);
+
+                return CreatedAtRoute("GetBookForAuthor", new {authorId, id = bookEntity.Id}, bookDtoCreated);
+            }
+
+            var updateBookDto = AutoMapper.Mapper.Map<BookUpdateDto>(bookFromRepo);
+            patchDoc.ApplyTo(updateBookDto);
+
+            AutoMapper.Mapper.Map(updateBookDto, bookFromRepo);
+
+            _libraryRepository.UpdateBookForAuthor(bookFromRepo);
+
+            if (!_libraryRepository.Save())
+            {
+                throw new Exception("something went wrong");
             }
 
             return NoContent();
