@@ -79,3 +79,65 @@
     // DELETE
     // Safe: No
     // Idempotent: Yes
+
+
+
+	Content Negotiation:
+	Accept header of HTTP Request Message.
+	Consumer of the application should pass requested media type through this header.
+		application/json
+		application/xml
+
+	If api supports provided format from Accept header... it should return data in that format.
+	If no accept header .. or api doesn't support requesed format... than it should return default format. 
+	if we don't support default format... 406 not acceptable must be returned. 
+
+	services.AddMvc(options =>
+            {
+                options.ReturnHttpNotAcceptable = true;
+                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
+            });
+
+
+	ReturnHttpNotAcceptable by default is false. 
+	return 406 if no formatted is selected.
+
+
+	Accept: application/json
+	Content-Type: application/json
+
+	Content type contains media type of a requets body.
+
+
+	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///
+
+	For CreatedAtRoute - check location header in http response.
+
+
+	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///	///
+
+
+	For JSONPatchDocument:
+	Add:
+	{ op: "add", path: "/a/b", value: "foo" }
+
+	Remove:
+	{ op: "remove", path: "/a/b" }
+
+	Replace:
+	{ op: "replace", path: "/a/b", value: "foo" }
+
+	Copy:
+	{ op: "copy", from: "/a/c", path: "/a/b" }
+
+	Move:
+	{ op: "moce", from: "/a/c", path: "/a/b" }
+
+	Test:
+	{ op: "test", from: "/a/c", value: "foo" }
+
+
+
+
+
